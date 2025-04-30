@@ -171,3 +171,39 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::graph::{degree_distribution, distance2_distribution};
+    use petgraph::graphmap::DiGraphMap;
+
+    #[test]
+    fn test_degree_distribution() {
+        let mut g = DiGraphMap::<usize, ()>::new();
+        g.add_node(0);
+        g.add_node(1);
+        g.add_node(2);
+        g.add_node(3);
+        g.add_edge(0, 1, ());
+        g.add_edge(1, 2, ());
+
+        let dist = degree_distribution(&g);
+        let expected = vec![(0, 2), (1, 2)];
+        assert_eq!(dist, expected);
+    }
+
+    #[test]
+    fn test_distance2_distribution() {
+        let mut g = DiGraphMap::<usize, ()>::new();
+        g.add_node(0);
+        g.add_node(1);
+        g.add_node(2);
+        g.add_node(3);
+        g.add_edge(0, 1, ());
+        g.add_edge(1, 2, ());
+
+        let dist2 = distance2_distribution(&g);
+        let expected2 = vec![(0, 3), (1, 1)];
+        assert_eq!(dist2, expected2);
+    }
+}
