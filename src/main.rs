@@ -12,6 +12,8 @@ mod graph {
     use petgraph::graphmap::DiGraphMap;
     use csv::ReaderBuilder;
 
+    // This function loads a directed graph from a TSV file with the source and the target in columns 0 and 1, respectively.
+    // Through this, it maps the subreddit names to the integer IDs.
     pub fn load_graph<P: AsRef<Path>>(path: P) -> Result<DiGraphMap<usize, ()>, Box<dyn Error>> {
         let mut rdr = ReaderBuilder::new()
             .delimiter(b'\t')
@@ -41,6 +43,7 @@ mod graph {
         Ok(graph)
     }
 
+    // This function computes the out-degree distribution: Vector of (degree, count).
     pub fn degree_distribution(graph: &DiGraphMap<usize, ()>) -> Vec<(usize, usize)> {
         let mut counts: HashMap<usize, usize> = HashMap::new();
         for node in graph.nodes() {
@@ -52,6 +55,7 @@ mod graph {
         dist
     }
 
+    // This function computes the distribution of the number of second-hop neighbors (distance 2), to see if the degrees matter in distribution.
     pub fn distance2_distribution(graph: &DiGraphMap<usize, ()>) -> Vec<(usize, usize)> {
         let mut counts: HashMap<usize, usize> = HashMap::new();
         for node in graph.nodes() {
@@ -79,6 +83,8 @@ mod visualization {
     use plotters::prelude::*;
     use plotters::coord::combinators::IntoLogRange;
 
+    // This just plots a histogram (Common bar graph).
+    // I stopped the axes at a certain point to help visualization
     pub fn plot_histogram_custom(
         data: &[(usize, usize)],
         output: &str,
@@ -145,6 +151,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let graph = graph::load_graph(path)?;
     println!("Loaded graph: {} nodes, {} edges", graph.node_count(), graph.edge_count());
 
+
+    // Degree distribution of the X axis up to 100, and the Y axis being logarithmic (Made sense for this visualization)
     println!("Computing degree distribution...");
     let deg_dist = graph::degree_distribution(&graph);
     visualization::plot_histogram_custom(
@@ -157,6 +165,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     )?;
     println!("Saved degree_distribution.png");
 
+    // Distance-2 (Two degree) distribution, the x and y axes both go up to 500 for visualization purposes
     println!("Computing distance-2 neighbor distribution...");
     let dist2_dist = graph::distance2_distribution(&graph);
     visualization::plot_histogram_custom(
@@ -178,6 +187,7 @@ mod tests {
     use petgraph::graphmap::DiGraphMap;
 
     #[test]
+    // This tests the degree distribution by making a small graph and asserting to see if the expected outcome matches the actual outcome
     fn test_degree_distribution() {
         let mut g = DiGraphMap::<usize, ()>::new();
         g.add_node(0);
@@ -193,6 +203,7 @@ mod tests {
     }
 
     #[test]
+    // Same for this test, although it's with distance 2.
     fn test_distance2_distribution() {
         let mut g = DiGraphMap::<usize, ()>::new();
         g.add_node(0);
