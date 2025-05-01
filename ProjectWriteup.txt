@@ -1,0 +1,46 @@
+﻿I’ve written a program that loads a tab-separated values dataset of a subreddit-to-subreddit hyperlink network, creates a directed graph from that network, and makes a visualization through histograms, saved as PNGs.
+
+
+The dataset contains directed connections between two subreddits from January 2014 to April 2017. I used the soc-redditHyperlinks-body.tsv dataset, which contains the network of subreddit-to-subreddit hyperlinks, focused on the hyperlinks contained within the body of any given post. I chose not to analyze sentiments between different subreddits because the complexity of that would be beyond the scope of this project, as there are easily over 10,000 different subreddits contained within the dataset. Thus, I chose to compute the degree distribution and distance-2 distribution, which shows whether only a few subreddits link out to many (the larger ones being hubs), or whether most link to only a handful. In the distance-2 distribution, it shows how quickly the distribution fans out from each respective subreddit when there’s two hyperlinks involved, which can show whether most or only a few communities are well-connected to many others through an intermediary.
+
+
+What the program does:
+First, I go through graph construction, where it reads the tab-separated values file I attached in the folder of the project, in which each line has their respective source_subreddit and target_subreddit. The program then internally maps each subreddit name to a unique integer ID and adds a directed edge for every hyperlink. 
+In the distribution computation functions, the program, for each node, counts the number of outgoing edges (links) it has, and then tallies how many nodes have degree = d, for each d. For the distance-2 distribution, the program, for each node, finds all the unique nodes reachable by two “hops” and tallies the counts (Not direct neighbors, but friends of friends).
+        For the visualization module, I used plotters to draw two histograms (I was going to use python for visualization, but I thought this would be more convenient, having it all in one file). For the degree distribution graph, the X axis is the degrees, set from 0-100, and the Y axis is a logarithmic scale of the count of nodes for each degree. I chose a logarithmic scale as it would be nondiscernable with a linear scale. It’s saved as the degree_distribution.png. For the distance-2 distribution graph, the X axis is the count of distance-2 neighbors, set from 0-500, and the Y axis is the count of nodes, also set from 0-500, saved as the distance2_distribution.png.
+        For the tests, I went with one simple test for each computation function. The program builds a four-node graph, and asserts whether or not the distributions match the expected computation, which I did out myself. This ensures the distribution functions aren’t spitting out wrong distribution calculations.
+
+
+For my dependencies:
+I used petgraph, csv, and plotters in my cargo.toml file. These are essential for the program in that petgraph is used for the graph data, csv is used with a tab separator to read the tsv file, and plotters is used to visualize the histogram.
+
+
+
+
+In order to run the program, I used the terminal command:
+cargo run --release -- ~/DS210Project/soc-redditHyperlinks-body.tsv
+
+
+Where ‘~’ is used in place of my actual file pathing for my computer.
+
+
+The output:
+You can see the graphs on the github repo, as this is a .txt file, so I can’t attach them here.
+
+
+The degree-distribution.png graph is a bar chart where the horizontal axis spans from 0 to 100, each bar’s height (Which is on a log scale for visualization reasons) shows how many subreddits have that exact number of outgoing hyperlinks.
+
+
+The distance2-distribution.png graph is a bar chart where both axes span from 0 to 500, the horizontal axis is the number of unique two-hop neighbors for each respective subreddit, and the vertical axis is how many subreddits have that exact number of distance-2 neighbors.
+
+
+My interpretation of the results:
+For the degree distribution graph:
+The fact that there’s a sort of tailing on the graph, even though it’s a logarithmic scale, shows that it’s true that there’s quite a few large subreddits that link out to many others. If that weren’t the case, then there would be near zero tailing. There’s quite a few large subreddits that link out to nearly 100 other subreddits. However, a large majority of subreddits (Nearly 10,000) link out to only one subreddit, which speaks to the fact that most subreddits only link to a handful of other ones, and they’re most probably subreddits that are closely related, topic-wise. An interesting point is that there’s more subreddits that link out to two subreddits rather than just one, which I wouldn’t have guessed would be the case.
+
+
+For the distance-2 distribution graph:
+There’s also a sort of tailing on this graph, but the most interesting part are the large, outlying spikes in the graph, which I can deduce as being the location of one or two overwhelmingly large subreddits and their two-hop neighbors. These spikes are littered throughout the graph, which speaks the location of all larger subreddits and their two-hop neighbors, which shows that these larger subreddits are “hubs”, which are extremely interconnected centers through which a number of smaller subreddits are connected to each other. This lines up with the degree-distribution graph, as it conveyed that there were large subreddits that link out to many others, and through this graph, I can assume that a large amount of the nearly 20,000 subreddits that link to only one or two other subreddits have these large subreddits as their direct neighbor. 
+
+
+In summary, the two graphs convey that there are hubs of large subreddits that are directly connected to a large amount of smaller subreddits, that, through using the large subreddit as a medium, can connect to a large number of other smaller subreddits with simply two hops. Makes me think about the seven degrees of separation phenomenon a lot more.
