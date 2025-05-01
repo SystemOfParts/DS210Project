@@ -1,10 +1,6 @@
 use std::error::Error;
 use std::env;
 
-extern crate petgraph;
-extern crate csv;
-extern crate plotters;
-
 mod graph {
     use std::error::Error;
     use std::path::Path;
